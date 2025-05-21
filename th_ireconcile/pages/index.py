@@ -8,6 +8,7 @@ from th_ireconcile.api.endpoints.compare import compare_text_endpoint
 from th_ireconcile.api.endpoints.extract import extract_text
 from th_ireconcile.api.endpoints.upload_blob import upload_blob
 from th_ireconcile.components.comparison_result import comparison_result_component
+from th_ireconcile.models.schemas import ComparisonResult, TextSegment
 from th_ireconcile.styles.colors import color_scheme
 
 
@@ -33,7 +34,22 @@ class AppState(rx.State):
     error_message: str = ""
 
     # Result states
-    comparison_result: dict = {}
+    comparison_result: ComparisonResult = ComparisonResult(
+        segments=[],
+        stats={
+            "total_characters": 0,
+            "exact_match_characters": 0,
+            "partial_match_characters": 0,
+            "no_match_characters": 0,
+            "total_words": 0,
+            "exact_match_words": 0,
+            "partial_match_words": 0,
+            "no_match_words": 0,
+            "exact_match_percent": 0.0,
+            "partial_match_percent": 0.0,
+            "no_match_percent": 0.0,
+        },
+    )
 
     def handle_artwork_image_upload(self, files: list[rx.UploadFile]):
         """
@@ -154,7 +170,7 @@ class AppState(rx.State):
                     self.is_processing = False
                     return
 
-                self.comparison_result = comparison_response.model_dump()
+                self.comparison_result = comparison_response
                 self.comparison_complete = True
 
             self.is_processing = False
