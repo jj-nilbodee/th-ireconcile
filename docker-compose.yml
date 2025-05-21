@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: ireconcile-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+    environment:
+      - AZURE_OCR_API_KEY=${AZURE_OCR_API_KEY}
+      - AZURE_OCR_ENDPOINT=${AZURE_OCR_ENDPOINT}
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING}
+      - AZURE_STORAGE_CONTAINER_NAME=${AZURE_STORAGE_CONTAINER_NAME}
+      - DEBUG=False

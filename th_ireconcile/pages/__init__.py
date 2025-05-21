@@ -1,0 +1,3 @@
+"""
+Pages for the application.
+"""
