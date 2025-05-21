@@ -33,21 +33,22 @@ def comparison_result_component(
         else:  # "none"
             return color_scheme["match_none"]
 
+    # Function to get background color for match type (consistent with legend)
+    def get_background_color_for_match_type(match_type: str) -> str:
+        if match_type == "exact":
+            return "rgba(34, 197, 94, 0.1)"  # Green background from legend
+        elif match_type == "partial":
+            return "rgba(245, 158, 11, 0.1)"  # Yellow background from legend
+        else:  # "none"
+            return "rgba(239, 68, 68, 0.1)"  # Red background from legend
+
     # Function to render a segment - will be used with rx.foreach
     def render_segment(segment):
         return rx.text(
             segment["text"],
             display="inline",
             color=get_color_for_match_type(segment["match_type"]),
-            bg=rx.cond(
-                segment["match_type"] == "exact",
-                get_color_for_match_type("exact"),  # Light green background
-                rx.cond(
-                    segment["match_type"] == "partial",
-                    get_color_for_match_type("partial"),  # Light yellow background
-                    get_color_for_match_type("none"),  # Light red background
-                ),
-            ),
+            bg=get_background_color_for_match_type(segment["match_type"]),
             font_weight=rx.cond(segment["match_type"] == "none", "bold", "normal"),
             padding="1",
             margin="1",
@@ -63,11 +64,13 @@ def comparison_result_component(
             rx.vstack(
                 rx.text("Exact Match", font_weight="bold"),
                 rx.heading(
-                    # Use simple string for heading with default
-                    "0.0%",
+                    f"{comparison_result['stats']['exact_match_percent']}%",
                     size="3",
                 ),
-                rx.text("0 of 0 words match exactly", font_size="sm"),
+                rx.text(
+                    f"{comparison_result['stats']['exact_match_words']} of {comparison_result['stats']['total_words']} words match exactly",
+                    font_size="sm",
+                ),
                 border_radius="md",
                 padding="4",
                 bg=get_color_for_match_type("exact"),  # Light green background
@@ -77,8 +80,14 @@ def comparison_result_component(
             # Partial Match Box
             rx.vstack(
                 rx.text("Partial Match", font_weight="bold"),
-                rx.heading("0.0%", size="3"),
-                rx.text("0 of 0 words partially match", font_size="sm"),
+                rx.heading(
+                    f"{comparison_result['stats']['partial_match_percent']}%",
+                    size="3",
+                ),
+                rx.text(
+                    f"{comparison_result['stats']['partial_match_words']} of {comparison_result['stats']['total_words']} words partially match",
+                    font_size="sm",
+                ),
                 border_radius="md",
                 padding="4",
                 bg=get_color_for_match_type("partial"),  # Light yellow background
@@ -88,8 +97,14 @@ def comparison_result_component(
             # No Match Box
             rx.vstack(
                 rx.text("No Match", font_weight="bold"),
-                rx.heading("0.0%", size="3"),
-                rx.text("0 of 0 words have no match", font_size="sm"),
+                rx.heading(
+                    f"{comparison_result['stats']['no_match_percent']}%",
+                    size="3",
+                ),
+                rx.text(
+                    f"{comparison_result['stats']['no_match_words']} of {comparison_result['stats']['total_words']} words have no match",
+                    font_size="sm",
+                ),
                 border_radius="md",
                 padding="4",
                 bg=get_color_for_match_type("none"),  # Light red background
@@ -146,7 +161,9 @@ def comparison_result_component(
             rx.tabs.content(
                 rx.box(
                     rx.flex(
-                        rx.text("Comparison results will appear here"),
+                        rx.foreach(
+                            comparison_result["segments"], render_segment
+                        ),
                         wrap="wrap",
                     ),
                     padding="4",
